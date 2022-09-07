@@ -14,14 +14,14 @@
       const socket = new WebSocket('ws://localhost:1337');
       socket.onopen = (event) => {
         console.log('Web Socket is connected');
-        const ID = Math.round(Math.random() * 100);
-        console.log('sending...', ID);
+        const id = Math.round(Math.random() * 100);
+        // console.log('sending...', id);
         const data = JSON.stringify({
-          ID,
-          name: `${[ID]} Saul`,
+          id,
+          name: `${[id]} Saul`,
           address: {
             street: 'my street',
-            number: 20 * ID,
+            number: 20 * id,
           },
           profession: 'JS Developer',
         });

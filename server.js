@@ -18,7 +18,7 @@ function onSocketUpgrade(req, socket, head) {
   const { 'sec-websocket-key': webClientSocketKey } = req.headers;
   const headers = prepareHandShakeHeaders(webClientSocketKey);
 
-  console.log(`${webClientSocketKey} connected`);
+  // console.log(`${webClientSocketKey} connected`);
 
   socket.write(headers);
   socket.on('readable', () => onSocketReadable(socket));
@@ -43,14 +43,31 @@ function onSocketReadable(socket) {
 
   const maskKey = socket.read(MASK_KEY_BYTES_LENGTH);
   const encoded = socket.read(messageLength);
-  const decode = unmask(encoded, maskKey);
-  console.log(decode.toString());
+  const decoded = unmask(encoded, maskKey);
+  const received = decoded.toString('utf-8');
+
+  const data = JSON.stringify(received);
+
+  console.log(`Message Received: ${data}`);
 }
 
 function unmask(encodedBuffer, maskKey) {
   let finalBuffer = Buffer.from(encodedBuffer);
+
+  const fillWithEightZeros = (t) => t.padStart(8, '0');
+  const toBinary = (t) => fillWithEightZeros(t.toString(2));
+  const fromBinaryToDecimal = (t) => parseInt(toBinary(t), 2);
+  const getCharFromBinary = (t) => String.fromCharCode(fromBinaryToDecimal(t));
+
   for (let i = 0; i < encodedBuffer.length; i++) {
-    finalBuffer[i] = encodedBuffer[i] ^ maskKey[i % 4];
+    finalBuffer[i] = encodedBuffer[i] ^ maskKey[i % MASK_KEY_BYTES_LENGTH];
+    const logger = {
+      unmaskingCalc: `${toBinary(encodedBuffer[i])} ^ ${toBinary(
+        maskKey[i % MASK_KEY_BYTES_LENGTH]
+      )} = ${toBinary(finalBuffer[i])}`,
+      decoded: getCharFromBinary(finalBuffer[i]),
+    };
+    console.log(logger);
   }
   return finalBuffer;
 }
