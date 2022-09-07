@@ -15,20 +15,19 @@
       socket.onopen = (event) => {
         console.log('Web Socket is connected');
         const id = Math.round(Math.random() * 100);
-        // console.log('sending...', id);
+
         const data = JSON.stringify({
           id,
           name: `${[id]} Saul`,
-          address: {
-            street: 'my street',
-            number: 20 * id,
-          },
           profession: 'JS Developer',
         });
 
         socket.send(data);
       };
-      socket.onmessage = (msg) => console.log(`I got message: ${msg}`);
+      socket.onmessage = (msg) => {
+        const message = msg.data;
+        messages.innerText = JSON.parse(message);
+      };
       socket.onerror = (error) => console.error(`Web Socket Error: ${error}`);
       socket.onclose = (event) =>
         console.log('Disconnected from WebSocket server');
